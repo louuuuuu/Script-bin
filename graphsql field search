@@ -1,0 +1,15 @@
+to this FIELDS=("is_active" "username" "email" "email_address" "created_at" "last_login" "first_name" "last_name" "role" "AdminUser" "adminuser" "role" "Role" "Permission" "permission" "policy" "Policy" "StaffAccount" "staffaccount")
+
+for field in "${FIELDS[@]}"; do
+  echo "Testing field: $field"
+  RESPONSE=$(curl -s -X POST https://exchange-api.bumba.global/graphql \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -d "{\"query\":\"query { users { $field } }\"}")
+
+  if [[ $RESPONSE != *"Cannot query field"* ]]; then
+    echo "✅ Field exists: $field"
+  else
+    echo "❌ Field does NOT exist: $field"
+  fi
+done
