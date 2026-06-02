@@ -10,14 +10,14 @@ for field in "${FIELDS[@]}"; do
   echo "Testing field: $field"
 
   # Try as scalar first
-  RESPONSE=$(curl -s -X POST https://exchange-api.bumba.global/graphql \
+  RESPONSE=$(curl -s -X POST [IP ADDRESS] \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer YOUR_TOKEN" \
     -d "{\"query\":\"query { users { $field } }\"}")
 
   if [[ $RESPONSE == *"Cannot query field"* ]]; then
     # If scalar fails, try as object with __typename
-    RESPONSE=$(curl -s -X POST https://exchange-api.bumba.global/graphql \
+    RESPONSE=$(curl -s -X POST [IP ADDRESS] \
       -H "Content-Type: application/json" \
       -H "Authorization: Bearer YOUR_TOKEN" \
       -d "{\"query\":\"query { users { $field { __typename } } }\"}")
