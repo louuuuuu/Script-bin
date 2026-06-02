@@ -1,26 +1,40 @@
-FIELDS=("is_active" "username" "email" "email_address" "created_at" "last_login" "first_name" "last_name" "role" \
-        "AdminUser" "adminuser" "Role" "Permission" "permission" "Policy" "policy" "StaffAccount" "staffaccount")
+#!/bin/bash
+
+FIELDS=("is_active" "username" "email" "email_address" "created_at" "last_login" \
+        "first_name" "last_name" "role" "AdminUser" "adminuser" "Role" \
+        "Permission" "permission" "Policy" "policy" "StaffAccount" "staffaccount")
+
+EXISTING_FIELDS=()
 
 for field in "${FIELDS[@]}"; do
   echo "Testing field: $field"
 
-  # Use subfield for objects to avoid GraphQL errors
+  # Try as scalar first
   RESPONSE=$(curl -s -X POST https://exchange-api.bumba.global/graphql \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer YOUR_TOKEN" \
-    -d "{\"query\":\"query { users { $field { __typename } } }\"}")
+    -d "{\"query\":\"query { users { $field } }\"}")
 
-  # Fallback for scalars: query without subfield
   if [[ $RESPONSE == *"Cannot query field"* ]]; then
+    # If scalar fails, try as object with __typename
     RESPONSE=$(curl -s -X POST https://exchange-api.bumba.global/graphql \
       -H "Content-Type: application/json" \
       -H "Authorization: Bearer YOUR_TOKEN" \
-      -d "{\"query\":\"query { users { $field } }\"}")
+      -d "{\"query\":\"query { users { $field { __typename } } }\"}")
   fi
 
   if [[ $RESPONSE != *"Cannot query field"* ]]; then
     echo "✅ Field exists: $field"
+    EXISTING_FIELDS+=("$field")
   else
     echo "❌ Field does NOT exist: $field"
   fi
 done
+
+echo
+echo "=============================="
+echo "Fields that actually exist:"
+for f in "${EXISTING_FIELDS[@]}"; do
+  echo "- $f"
+done
+echo "=============================="
